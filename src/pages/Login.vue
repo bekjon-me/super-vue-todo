@@ -1,6 +1,21 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
-import { LockClosedIcon } from '@heroicons/vue/20/solid'
+import { LockClosedIcon, EyeIcon, EyeSlashIcon } from '@heroicons/vue/20/solid'
+import { ref } from 'vue'
+import { handleLogin } from '@/service/login'
+
+const payload = ref({
+  username: '',
+  password: ''
+})
+
+const show = ref(false)
+
+const handleSubmit = (e: Event) => {
+  e.preventDefault()
+
+  handleLogin(payload.value)
+}
 </script>
 
 <template>
@@ -12,32 +27,48 @@ import { LockClosedIcon } from '@heroicons/vue/20/solid'
           Sign in to your account
         </h2>
       </div>
-      <form class="mt-8 space-y-6" action="#" method="POST">
+      <form class="mt-8 space-y-6" :onsubmit="handleSubmit">
         <input type="hidden" name="remember" value="true" />
         <div class="-space-y-px rounded-md shadow-sm">
-          <div>
-            <label for="email-address" class="sr-only">Email address</label>
+          <div class="relative">
+            <label for="username" class="sr-only">Username</label>
             <input
-              id="email-address"
-              name="email"
-              type="email"
-              autocomplete="email"
+              id="username"
+              name="username"
+              type="text"
+              autocomplete="username"
               required
               class="relative block w-full rounded-t-md border-0 p-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 outline-none"
-              placeholder="Email address"
+              placeholder="Username"
+              v-model="payload.username"
             />
           </div>
-          <div>
+          <div class="relative">
             <label for="password" class="sr-only">Password</label>
             <input
               id="password"
               name="password"
-              type="password"
+              :type="show ? 'text' : 'password'"
               autocomplete="current-password"
               required
               class="relative block w-full rounded-b-md border-0 p-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 outline-none"
               placeholder="Password"
+              v-model="payload.password"
             />
+            <div class="absolute z-10 inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
+              <EyeIcon
+                v-if="!show"
+                class="h-5 w-5 text-gray-400 cursor-pointer"
+                aria-hidden="true"
+                @click="show = !show"
+              />
+              <EyeSlashIcon
+                v-else
+                class="h-5 w-5 text-gray-400 cursor-pointer"
+                aria-hidden="true"
+                @click="show = !show"
+              />
+            </div>
           </div>
         </div>
 

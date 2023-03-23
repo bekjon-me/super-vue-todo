@@ -1,10 +1,13 @@
-import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import {
+  createRouter,
+  createWebHistory,
+  type NavigationGuardNext,
+  type RouteLocationNormalized,
+  type RouteRecordRaw
+} from 'vue-router'
 import HomeView from '../pages/Home.vue'
 import Login from '../pages/Login.vue'
 import Register from '../pages/Register.vue'
-import { useAuth } from '../stores/auth'
-
-const isAuthenticated = false
 
 const routes: RouteRecordRaw[] = [
   {
@@ -29,7 +32,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/:catchAll(.*)*',
-    component: HomeView
+    redirect: '/'
   }
 ]
 
@@ -38,9 +41,19 @@ const router = createRouter({
   routes: routes
 })
 
-router.beforeEach(async (to, from) => {
-  if (!isAuthenticated && to.name !== 'Login' && to.name !== 'Register') {
-    return { name: 'Login' }
+router.beforeEach((to, from, next) => {
+  var isAuthenticated = false
+  if (localStorage.getItem('tokens')) {
+    isAuthenticated = true
+  } else {
+    isAuthenticated = false
+  }
+  if (!isAuthenticated && to.name === 'Home') {
+    next('/login')
+  } else if ((isAuthenticated && to.name === 'Login') || to.name === 'Register') {
+    next('/')
+  } else {
+    next()
   }
 })
 

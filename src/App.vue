@@ -1,10 +1,19 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { RouterView } from 'vue-router'
-import jwt_decode from 'jwt-decode'
+import { withTokenInstance } from './api/axios'
+import { useAuth } from './stores/auth'
+import { USER_URL } from './utils/urls'
+const { createUser } = useAuth()
 
-const tokens = JSON.parse(localStorage.getItem('tokens') || '{}')
-const accessToken = tokens ? tokens.access : null
-console.log(jwt_decode(accessToken))
+onMounted(async () => {
+  try {
+    const res = await withTokenInstance.get(USER_URL)
+    createUser(res.data)
+  } catch (error) {
+    console.log(error)
+  }
+})
 </script>
 
 <template>

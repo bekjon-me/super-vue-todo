@@ -1,6 +1,8 @@
 import { nonTokenInstance } from '../api/axios'
 import { AUTH_USER_URL, LOGIN_USER_URL } from '../utils/urls'
 import { toast } from 'vue3-toastify'
+import router from '@/router'
+import { useAuth } from './../stores/auth'
 
 type Payload = {
   username: string
@@ -10,7 +12,7 @@ type Payload = {
 }
 
 export const handleRegister = (values: Payload) => {
-  console.log(values)
+  const { createUser } = useAuth()
 
   nonTokenInstance
     .post(AUTH_USER_URL, values)
@@ -21,7 +23,9 @@ export const handleRegister = (values: Payload) => {
         refresh: res.data.refresh_token
       }
       localStorage.setItem('tokens', JSON.stringify(tokens))
+      createUser(res.data.user)
       toast.success('You have successfully registered')
+      router.push('/')
     })
 
     .catch((err) => {

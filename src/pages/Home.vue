@@ -1,5 +1,13 @@
 <script setup lang="ts">
+import { withTokenInstance } from '@/api/axios'
 import Header from '@/components/Header.vue'
+import { useAuth } from '@/stores/auth'
+import { LOGIN_USER_URL } from '@/utils/urls'
+import { storeToRefs } from 'pinia'
+import { onMounted } from 'vue'
+
+const auth = useAuth()
+const { user } = storeToRefs(auth)
 </script>
 
 <template>
