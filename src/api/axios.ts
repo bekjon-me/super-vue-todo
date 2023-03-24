@@ -1,3 +1,4 @@
+import { REFRESH_TOKEN_URL } from '@/utils/urls'
 import axios from 'axios'
 
 const baseURL = 'http://127.0.0.1:8000'
@@ -31,7 +32,7 @@ withTokenInstance.interceptors.response.use(
       const payload = {
         refresh: authData?.refresh
       }
-      let apiResponse = await axios.post(baseURL + 'api/auth/token/refresh/', payload)
+      const apiResponse = await axios.post(baseURL + REFRESH_TOKEN_URL, payload)
       authData.access = apiResponse.data.access
       localStorage.setItem('tokens', JSON.stringify(authData))
       error.config.headers['Authorization'] = `Bearer ${apiResponse.data.access}`
