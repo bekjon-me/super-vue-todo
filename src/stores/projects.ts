@@ -13,9 +13,14 @@ export const useProjects = defineStore('projects', () => {
     projects.value = projectsList
   }
 
+  const deleteProjects = () => {
+    projects.value = []
+  }
+
   return {
     projects,
     createProject,
-    setProjects
+    setProjects,
+    deleteProjects
   }
 })

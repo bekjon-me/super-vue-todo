@@ -1,7 +1,11 @@
+import { USER_URL } from './../utils/urls'
+import { withTokenInstance } from './../api/axios'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import HomeView from '../pages/Home.vue'
 import Login from '../pages/Login.vue'
 import Register from '../pages/Register.vue'
+import Profile from '../pages/Profile.vue'
+import Project from '../pages/Project.vue'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -22,7 +26,17 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/profile',
     name: 'Profile',
-    component: () => import('../pages/Profile.vue')
+    component: Profile
+  },
+  {
+    path: '/projects/:id/tasks',
+    name: 'Project',
+    component: Project
+  },
+  {
+    path: '/projects/:id/todos/:todoId',
+    name: 'Todo',
+    component: Profile
   },
   {
     path: '/:catchAll(.*)*',
@@ -35,16 +49,21 @@ const router = createRouter({
   routes: routes
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   var isAuthenticated = false
   if (localStorage.getItem('tokens')) {
-    isAuthenticated = true
+    try {
+      const res = await withTokenInstance.get(USER_URL)
+      isAuthenticated = true
+    } catch (error) {
+      isAuthenticated = false
+    }
   } else {
     isAuthenticated = false
   }
-  if (!isAuthenticated && to.name === 'Home') {
+  if (!isAuthenticated && (to.name === 'Home' || to.name === 'Project')) {
     next('/login')
-  } else if ((isAuthenticated && to.name === 'Login') || to.name === 'Register') {
+  } else if (isAuthenticated && (to.name === 'Login' || to.name === 'Register')) {
     next('/')
   } else {
     next()

@@ -1,7 +1,7 @@
 import { REFRESH_TOKEN_URL } from '@/utils/urls'
 import axios from 'axios'
 
-const baseURL = 'http://127.0.0.1:8000'
+const baseURL = 'http://47.254.127.151'
 
 export const nonTokenInstance = axios.create({
   baseURL: baseURL,

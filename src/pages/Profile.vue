@@ -1,3 +1,5 @@
+<script lang="ts" setup></script>
+
 <template>
   <div class="about">
     <h1>This is an profile page</h1>

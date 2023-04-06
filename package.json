@@ -14,16 +14,18 @@
   "dependencies": {
     "@heroicons/vue": "^2.0.16",
     "axios": "^1.3.4",
+    "flowbite": "^1.6.4",
     "jwt-decode": "^3.1.2",
     "pinia": "^2.0.32",
     "solid": "link:@heroicons/vue/20/solid",
     "vue": "^3.2.47",
     "vue-router": "^4.1.6",
+    "vue3-datepicker": "^0.3.4",
     "vue3-toastify": "^0.1.5"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.2.0",
-    "@types/node": "^18.14.2",
+    "@types/node": "^18.15.0",
     "@vitejs/plugin-vue": "^4.0.0",
     "@vue/eslint-config-prettier": "^7.1.0",
     "@vue/eslint-config-typescript": "^11.0.2",

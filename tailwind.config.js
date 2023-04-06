@@ -5,9 +5,10 @@ module.exports = {
     extend: {
       extend: {},
       fontFamily: {
-        poppins: ['Poppins', 'sans-serif']
+        poppins: ['Poppins', 'sans-serif'],
+        dancing: ['Dancing Script', 'cursive']
       }
     }
   },
-  plugins: []
+  plugins: [require('flowbite/plugin')]
 }
