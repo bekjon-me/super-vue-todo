@@ -6,6 +6,9 @@ import Login from '../pages/Login.vue'
 import Register from '../pages/Register.vue'
 import Profile from '../pages/Profile.vue'
 import Project from '../pages/Project.vue'
+import axios from 'axios'
+
+const source = axios.CancelToken.source()
 
 const routes: RouteRecordRaw[] = [
   {
@@ -56,18 +59,34 @@ router.beforeEach(async (to, from, next) => {
       const res = await withTokenInstance.get(USER_URL)
       isAuthenticated = true
     } catch (error) {
+      console.log(error)
       isAuthenticated = false
     }
   } else {
     isAuthenticated = false
   }
-  if (!isAuthenticated && (to.name === 'Home' || to.name === 'Project')) {
-    next('/login')
-  } else if (isAuthenticated && (to.name === 'Login' || to.name === 'Register')) {
-    next('/')
+
+  if (isAuthenticated) {
+    if (to.name === 'Login' || to.name === 'Register') {
+      next('/')
+    } else {
+      next()
+    }
   } else {
-    next()
+    if (to.name === 'Home' || to.name === 'Project') {
+      next('/login')
+    } else {
+      next()
+    }
   }
+
+  // if (!isAuthenticated && (to.name === 'Home' || to.name === 'Project')) {
+  //   next('/login')
+  // } else if (isAuthenticated && (to.name === 'Login' || to.name === 'Register')) {
+  //   next('/')
+  // } else {
+  //   next()
+  // }
 })
 
 export default router

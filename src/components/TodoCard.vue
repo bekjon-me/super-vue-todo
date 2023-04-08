@@ -1,76 +1,152 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watchEffect } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { PROJECTS_URL } from '@/utils/urls'
 import { withTokenInstance } from '@/api/axios'
 import doThis from '@/assets/dothis.jpg'
 import FileLoader from '@/components/FileLoader.vue'
 import type { Todo } from '@/models/todo'
+import { useFilesDownloaded } from '@/stores/filesDownloaded'
+import { storeToRefs } from 'pinia'
+import AudioPlayer from 'vue3-audio-player'
+import axios from 'axios'
 
+const source = axios.CancelToken.source()
 const props = defineProps<{
   todo: Todo
 }>()
+const { setFilesDownloaded } = useFilesDownloaded()
+const { filesDownloadedForFirstTime } = storeToRefs(useFilesDownloaded())
+const { params } = useRoute()
+const { id } = params
+
+const file = ref('')
+const loading = ref(false)
+const attachedIs = ref('video')
+
+const forceFileDownload = async (response: any) => {
+  const url = window.URL.createObjectURL(response)
+  file.value = url
+  checkBlobType(url)
+  console.log(file.value)
+
+  return url
+}
 
 onMounted(async () => {
   try {
     loading.value = true
     if ((props.todo.attached_files as any[]).length > 0) {
-      const res = await withTokenInstance.get(
-        `${PROJECTS_URL}${id}/tasks/${props.todo.ptid}/files/${
-          (props.todo.attached_files as any[])[(props.todo.attached_files as any[]).length - 1].tfid
-        }`
-      )
-      const res2 = await withTokenInstance.get(res.data.attached_file, {
-        responseType: 'blob'
-      })
-      forceFileDownload(res2.data)
+      if (localStorage.getItem(`${id}${props.todo.ptid}`) && filesDownloadedForFirstTime.value) {
+        file.value = localStorage.getItem(`${id}${props.todo.ptid}`) as string
+        await checkBlobType(file.value)
+      } else {
+        const res = await withTokenInstance.get(
+          `${PROJECTS_URL}${id}/tasks/${props.todo.ptid}/files/${
+            (props.todo.attached_files as any[])[(props.todo.attached_files as any[]).length - 1]
+              .tfid
+          }`
+        )
+
+        const attachedFile = res.data.attached_file
+
+        const newAxiosInstance = axios.create()
+        newAxiosInstance.interceptors.request = withTokenInstance.interceptors.request
+        newAxiosInstance.interceptors.response = withTokenInstance.interceptors.response
+
+        const res2 = await newAxiosInstance.get(attachedFile, {
+          cancelToken: source.token,
+          responseType: 'blob'
+        })
+
+        localStorage.setItem(`${id}${props.todo.ptid}`, await forceFileDownload(res2.data))
+        forceFileDownload(res2.data)
+        setFilesDownloaded(true)
+      }
     } else {
       file.value = doThis
+      console.log('no file')
     }
   } catch (error) {
-    console.log(error)
+    attachedIs.value = 'image'
+    file.value = doThis
   } finally {
     loading.value = false
   }
 })
 
-const { params } = useRoute()
-const { id } = params
+onUnmounted(() => {
+  source.cancel()
+})
 
-const loading = ref(false)
-const file = ref('')
-const commonClass = ref(
-  'max-w-sm  border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700'
-)
-const importance = ['not_important', 'moderately_important', 'important']
-console.log()
+const color = computed(() => {
+  if (props.todo.importance === 'important') {
+    return 'bg-red-500'
+  } else if (props.todo.importance === 'moderately_important') {
+    return 'bg-yellow-500'
+  } else {
+    return 'bg-green-500'
+  }
+})
 
-const activeClass = ref(['bg-white', 'bg-[#fffb009a]', 'bg-[#ff000083]'])
+function checkBlobType(blobUrl: string) {
+  return new Promise((resolve, reject) => {
+    fetch(blobUrl)
+      .then((response) => response.arrayBuffer())
+      .then((arrayBuffer) => {
+        const uintArray = new Uint8Array(arrayBuffer)
+        const header = uintArray.subarray(0, 4)
+        const type = header.reduce((acc, cur) => acc + cur.toString(16), '')
+        console.log(type)
 
-const forceFileDownload = (response: any) => {
-  const url = window.URL.createObjectURL(new Blob([response]))
-  file.value = url
+        if (type === '00000018' || type === '66747970' || type === '00020') {
+          attachedIs.value = 'video'
+          resolve('video')
+        } else if (type === '0001c') {
+          attachedIs.value = 'audio'
+          resolve('audio')
+        } else {
+          attachedIs.value = 'image'
+          resolve('image')
+        }
+      })
+      .catch((error) => reject(error))
+  })
 }
 </script>
 
 <template>
-  <div :class="[commonClass, activeClass[importance.indexOf(props.todo.importance)]]">
-    <div class="w-96 h-96 relative rounded-md flex justify-center items-center bg-black">
+  <div class="max-w-sm border border-gray-200 rounded-lg shadow dark:border-gray-700">
+    <div class="w-96 h-96 relative rounded-md flex justify-center items-center dark:bg-gray-800">
       <img
-        v-if="!loading"
+        v-if="!loading && attachedIs === 'image'"
         class="absolute h-full object-cover rounded-md"
         :src="file"
         alt="Todo attached img"
       />
-      <div v-else>
+      <video v-if="!loading && attachedIs === 'video'" class="absolute h-full" controls>
+        <source :src="file" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+      <AudioPlayer
+        v-if="!loading && attachedIs === 'audio'"
+        class="absolute h-full w-full flex justify-center items-center"
+        :style="{ width: '100%' }"
+        :option="{
+          src: file,
+          title: 'Audio',
+          coverImage: doThis
+        }"
+      />
+      <div v-if="loading">
         <FileLoader />
       </div>
     </div>
-    <div class="p-5">
+    <div :class="['p-5', color]">
       <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
         {{ todo.title }}
       </h5>
-      <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
+      <p class="mb-3 font-normal text-gray-700 dark:text-gray-200">
         {{
           todo.description.length > 300
             ? todo.description.substring(0, 300) + '...'

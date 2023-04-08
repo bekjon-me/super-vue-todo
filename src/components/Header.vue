@@ -1,23 +1,40 @@
 <script setup lang="ts">
 import { useAuth } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
-import { ref } from 'vue'
+import { onUnmounted, ref } from 'vue'
 import { ArrowRightOnRectangleIcon } from '@heroicons/vue/20/solid'
 import { useProjects } from '@/stores/projects'
+import ThemeSwitcher from './ThemeSwitcher.vue'
 
 const auth = useAuth()
 const projects = useProjects()
 const { user } = storeToRefs(auth)
 const showDropdown = ref(false)
+const dropdown = ref()
 
 const toggleDropdown = () => {
   showDropdown.value = !showDropdown.value
+  if (showDropdown.value) {
+    document.addEventListener('click', handleClickOutside)
+  } else {
+    document.removeEventListener('click', handleClickOutside)
+  }
 }
 
 const handleLogout = () => {
   auth.logout()
   projects.deleteProjects()
 }
+
+const handleClickOutside = (event: Event) => {
+  if (dropdown.value && !dropdown.value.contains(event.target as HTMLElement)) {
+    toggleDropdown()
+  }
+}
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 </script>
 
 <template>
@@ -27,25 +44,18 @@ const handleLogout = () => {
         name: 'Home'
       }"
     >
-      <h2 class="text-[#000] body-font font-poppins text-xl font-semibold">AdvancedTodo</h2>
+      <h2 class="body-font font-poppins text-xl font-semibold">AdvancedTodo</h2>
     </RouterLink>
     <div class="flex items-center gap-2">
-      <h2 class="text-lg text-[#444] font-poppins font-medium">
-        {{
-          user
-            ? user.username.length > 15
-              ? user.username.substring(0, 14) + '...'
-              : user.username
-            : 'Login'
-        }}
-      </h2>
-      <div class="relative">
+      <ThemeSwitcher />
+      <div class="relative" ref="dropdown">
         <img
           @click="toggleDropdown"
           src="../assets/user.jpg"
           alt="User"
           class="w-[60px] rounded-full cursor-pointer"
         />
+
         <div
           v-if="showDropdown"
           id="dropdown"
@@ -58,7 +68,6 @@ const handleLogout = () => {
             <li>
               <RouterLink
                 :to="{ name: 'Profile' }"
-                href="#"
                 class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
               >
                 Profile

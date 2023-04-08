@@ -1,11 +1,13 @@
 import { REFRESH_TOKEN_URL } from '@/utils/urls'
 import axios from 'axios'
 
+export const source = axios.CancelToken.source()
+
 const baseURL = 'http://47.254.127.151'
 
 export const nonTokenInstance = axios.create({
   baseURL: baseURL,
-  timeout: 30000,
+  // timeout: 30000,
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json; charset=utf-8'
@@ -18,8 +20,8 @@ export const nonTokenInstance = axios.create({
 })
 
 export const withTokenInstance = axios.create({
-  baseURL: baseURL,
-  timeout: 30000
+  baseURL: baseURL
+  // timeout: 30000
 })
 
 withTokenInstance.interceptors.response.use(

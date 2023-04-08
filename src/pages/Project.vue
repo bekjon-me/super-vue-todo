@@ -9,6 +9,7 @@ import { onMounted, ref, toRaw } from 'vue'
 import { useRoute } from 'vue-router'
 import { useModal } from '@/stores/modal'
 import { useTodos } from '@/stores/todos'
+import { useLoader } from '@/stores/loader'
 import { storeToRefs } from 'pinia'
 import { Status, type Todo } from '@/models/todo'
 import { Importance } from '@/models/todo'
@@ -17,12 +18,13 @@ import Datepicker from 'vue3-datepicker'
 
 const fetchData = async () => {
   try {
+    setLoader(true)
     const res = await withTokenInstance.get(`${PROJECTS_URL}${id}/tasks`)
-    console.log(res.data)
-
     setTodos(res.data)
   } catch (error) {
     console.log(error)
+  } finally {
+    setLoader(false)
   }
 }
 
@@ -30,6 +32,7 @@ onMounted(async () => {
   fetchData()
 })
 
+const { setLoader } = useLoader()
 const modal = useModal()
 const todosStore = useTodos()
 const { setTodos } = todosStore
@@ -100,7 +103,7 @@ const format = 'yyyy-MM-dd HH:mm:ss'
           required
           v-model.trim="newTodo.description"
         />
-        <div class="flex flex-wrap gap-4 justify-around mt-2">
+        <div class="flex flex-col gap-x-4 justify-around mt-2">
           <div>
             <label
               class="block mt-4 text-sm font-medium text-gray-900 dark:text-white"
@@ -111,7 +114,7 @@ const format = 'yyyy-MM-dd HH:mm:ss'
             <Datepicker
               id="startDate"
               type="date"
-              class="border-[1px] border-[#333] rounded py-[12px] px-[24px] mt-[12px] mb-[12px] text-[#333]"
+              class="border-[1px] border-[#333] rounded py-[12px] px-[24px] mt-[12px] mb-[12px] text-[#333] w-full"
               v-model="newTodo.beginning"
               :format="format"
             />
@@ -126,7 +129,7 @@ const format = 'yyyy-MM-dd HH:mm:ss'
             <Datepicker
               id="endDate"
               type="date"
-              class="border-[1px] border-[#333] rounded py-[12px] px-[24px] mt-[12px] mb-[12px] text-[#333]"
+              class="border-[1px] border-[#333] rounded py-[12px] px-[24px] mt-[12px] mb-[12px] text-[#333] w-full"
               v-model="newTodo.completion"
               :format="format"
             />
@@ -189,7 +192,7 @@ const format = 'yyyy-MM-dd HH:mm:ss'
     </template>
   </Modal>
 
-  <div class="mt-2 text-[30px] text-[#333] border-b-2">Tasks</div>
+  <div class="mt-2 text-[30px] text-[#333] border-b-2 dark:text-white">Tasks</div>
   <div class="flex flex-wrap gap-4 justify-around mt-2">
     <TodoCard v-for="todo in todos" :todo="todo" />
   </div>

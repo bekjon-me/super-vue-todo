@@ -9,12 +9,11 @@ import { PROJECTS_URL, USER_URL } from './utils/urls'
 import { useAuth } from './stores/auth'
 import { useProjects } from './stores/projects'
 
-const auth = useAuth()
 const loader = useLoader()
+const { createUser } = useAuth()
+const { setProjects } = useProjects()
 const { setLoader } = loader
 const { showLoader } = storeToRefs(loader)
-const { createUser } = auth
-const { setProjects } = useProjects()
 
 const fetchData = async () => {
   try {
@@ -36,12 +35,19 @@ onMounted(async () => {
 </script>
 
 <template>
-  <RouterView v-if="!showLoader" />
-  <Loader v-else />
+  <div v-show="!showLoader">
+    <RouterView />
+  </div>
+  <Loader v-if="showLoader" />
 </template>
 
 <style>
 #app {
   padding: 12px;
+}
+
+.dark {
+  background: #16171d;
+  color: #dbdbdb;
 }
 </style>

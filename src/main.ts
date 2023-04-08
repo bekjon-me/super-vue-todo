@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 import Vue3Toastify, { type ToastContainerOptions } from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
 import './index.css'
+import 'vue3-audio-player/dist/style.css'
 import App from './App.vue'
 import router from './router'
 
