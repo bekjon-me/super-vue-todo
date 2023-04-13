@@ -9,74 +9,16 @@ import type { Todo } from '@/models/todo'
 import { useFilesDownloaded } from '@/stores/filesDownloaded'
 import { storeToRefs } from 'pinia'
 import AudioPlayer from 'vue3-audio-player'
-import axios from 'axios'
+import randomImage from '@/assets/motivationalImages'
 
-const source = axios.CancelToken.source()
 const props = defineProps<{
   todo: Todo
 }>()
-const { setFilesDownloaded } = useFilesDownloaded()
-const { filesDownloadedForFirstTime } = storeToRefs(useFilesDownloaded())
-const { params } = useRoute()
-const { id } = params
 
-const file = ref('')
-const loading = ref(false)
-const attachedIs = ref('video')
-
-const forceFileDownload = async (response: any) => {
-  const url = window.URL.createObjectURL(response)
-  file.value = url
-  checkBlobType(url)
-  console.log(file.value)
-
-  return url
-}
+const image = ref()
 
 onMounted(async () => {
-  try {
-    loading.value = true
-    if ((props.todo.attached_files as any[]).length > 0) {
-      if (localStorage.getItem(`${id}${props.todo.ptid}`) && filesDownloadedForFirstTime.value) {
-        file.value = localStorage.getItem(`${id}${props.todo.ptid}`) as string
-        await checkBlobType(file.value)
-      } else {
-        const res = await withTokenInstance.get(
-          `${PROJECTS_URL}${id}/tasks/${props.todo.ptid}/files/${
-            (props.todo.attached_files as any[])[(props.todo.attached_files as any[]).length - 1]
-              .tfid
-          }`
-        )
-
-        const attachedFile = res.data.attached_file
-
-        const newAxiosInstance = axios.create()
-        newAxiosInstance.interceptors.request = withTokenInstance.interceptors.request
-        newAxiosInstance.interceptors.response = withTokenInstance.interceptors.response
-
-        const res2 = await newAxiosInstance.get(attachedFile, {
-          cancelToken: source.token,
-          responseType: 'blob'
-        })
-
-        localStorage.setItem(`${id}${props.todo.ptid}`, await forceFileDownload(res2.data))
-        forceFileDownload(res2.data)
-        setFilesDownloaded(true)
-      }
-    } else {
-      file.value = doThis
-      console.log('no file')
-    }
-  } catch (error) {
-    attachedIs.value = 'image'
-    file.value = doThis
-  } finally {
-    loading.value = false
-  }
-})
-
-onUnmounted(() => {
-  source.cancel()
+  image.value = randomImage()
 })
 
 const color = computed(() => {
@@ -88,59 +30,12 @@ const color = computed(() => {
     return 'bg-green-500'
   }
 })
-
-function checkBlobType(blobUrl: string) {
-  return new Promise((resolve, reject) => {
-    fetch(blobUrl)
-      .then((response) => response.arrayBuffer())
-      .then((arrayBuffer) => {
-        const uintArray = new Uint8Array(arrayBuffer)
-        const header = uintArray.subarray(0, 4)
-        const type = header.reduce((acc, cur) => acc + cur.toString(16), '')
-        console.log(type)
-
-        if (type === '00000018' || type === '66747970' || type === '00020') {
-          attachedIs.value = 'video'
-          resolve('video')
-        } else if (type === '0001c') {
-          attachedIs.value = 'audio'
-          resolve('audio')
-        } else {
-          attachedIs.value = 'image'
-          resolve('image')
-        }
-      })
-      .catch((error) => reject(error))
-  })
-}
 </script>
 
 <template>
-  <div class="max-w-sm border border-gray-200 rounded-lg shadow dark:border-gray-700">
-    <div class="w-96 h-96 relative rounded-md flex justify-center items-center dark:bg-gray-800">
-      <img
-        v-if="!loading && attachedIs === 'image'"
-        class="absolute h-full object-cover rounded-md"
-        :src="file"
-        alt="Todo attached img"
-      />
-      <video v-if="!loading && attachedIs === 'video'" class="absolute h-full" controls>
-        <source :src="file" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-      <AudioPlayer
-        v-if="!loading && attachedIs === 'audio'"
-        class="absolute h-full w-full flex justify-center items-center"
-        :style="{ width: '100%' }"
-        :option="{
-          src: file,
-          title: 'Audio',
-          coverImage: doThis
-        }"
-      />
-      <div v-if="loading">
-        <FileLoader />
-      </div>
+  <div class="max-w-sm border border-gray-200 shadow dark:border-gray-700">
+    <div class="w-96 h-96 relative flex justify-center items-center dark:bg-gray-800">
+      <img class="absolute h-full object-cover" :src="image" alt="Todo Card image" />
     </div>
     <div :class="['p-5', color]">
       <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
@@ -153,10 +48,8 @@ function checkBlobType(blobUrl: string) {
             : todo.description
         }}
       </p>
-
       <RouterLink
         :to="{ name: 'Todo', params: { todoId: todo.ptid } }"
-        href="#"
         class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
       >
         Let's check it out

@@ -1,29 +1,37 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { Todo } from '@/models/todo'
+import type { Project } from '@/models/project'
 export const useModal = defineStore('modal', () => {
   const showModal = ref(false)
-  const newTodo = ref<Todo>()
+  const showMainModal = ref(false)
   const projectName = ref('')
+  const changingProject = ref()
 
   const toggleModal = () => {
     showModal.value = !showModal.value
   }
 
-  const setNewTodo = (todo: Todo) => {
-    newTodo.value = todo
+  const toggleMainModal = () => {
+    showMainModal.value = !showMainModal.value
   }
 
   const setProjectName = (name: string) => {
     projectName.value = name
   }
 
+  const setChangingProject = (project: Project) => {
+    changingProject.value = project
+  }
+
   return {
     showModal,
-    newTodo,
-    projectName,
     toggleModal,
+    projectName,
     setProjectName,
-    setNewTodo
+    showMainModal,
+    toggleMainModal,
+    changingProject,
+    setChangingProject
   }
 })

@@ -4,10 +4,19 @@ import axios from 'axios'
 import { onMounted, ref } from 'vue'
 import loadings from '@/utils/loadings'
 import { RouterLink } from 'vue-router'
+import Modal from './Modal.vue'
+import { useModal } from '@/stores/modal'
+import { storeToRefs } from 'pinia'
+import { updateProject } from '@/service/updateProject'
+import { deleteProject } from '@/service/deleteProject'
+import moment from 'moment'
 
-defineProps<{
+const props = defineProps<{
   project: Project
 }>()
+const modal = useModal()
+const { showModal, showMainModal, changingProject } = storeToRefs(modal)
+const { toggleModal, toggleMainModal, setChangingProject } = modal
 
 type Quote = {
   content: string
@@ -32,16 +41,42 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+const editProject = () => {
+  setChangingProject({ ...props.project })
+  if (showMainModal.value) toggleMainModal()
+  toggleModal()
+}
+
+const handleDeleteProject = async () => {
+  setChangingProject({ ...props.project })
+  deleteProject(changingProject.value.upid)
+}
+
+const handleSubmit = () => {
+  updateProject(changingProject)
+}
 </script>
 
 <template>
   <div
-    class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+    class="relative max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
   >
     <div class="bg-[url('@/assets/thinkHappy.jpg')] w-96 h-96 bg-center relative rounded-md">
       <div class="absolute w-full h-full bg-[#000000c2] rounded-md text-white p-6">
         <h2 class="text-lg font-poppins">{{ quote.content }}</h2>
-        <h5 class="text-4xl font-dancing text-center mt-4">{{ quote.author }}</h5>
+        <h5 class="text-4xl font-dancing text-center">{{ quote.author }}</h5>
+        <div class="absolute bottom-2 right-6 flex flex-col items-center justify-center">
+          <span class="text-xs text-gray-300 dark:text-gray-200">
+            Created at
+            {{ moment(project?.created).format('DD-MM-YYYY HH:mm:ss') }}
+          </span>
+
+          <span class="text-xs text-gray-300 dark:text-gray-200">
+            Last updated at
+            {{ moment(project?.updated).format('DD-MM-YYYY HH:mm:ss') }}
+          </span>
+        </div>
       </div>
     </div>
     <div class="p-5">
@@ -69,5 +104,42 @@ onMounted(async () => {
         </svg>
       </RouterLink>
     </div>
+    <div class="absolute bottom-5 right-5 flex gap-2">
+      <button
+        class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+        @click="handleDeleteProject"
+      >
+        Delete
+      </button>
+
+      <button
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        @click="editProject"
+      >
+        Edit
+      </button>
+    </div>
   </div>
+  <Modal v-if="showModal && !showMainModal">
+    <template #form>
+      <form class="flex flex-col gap-4" @submit.prevent="handleSubmit">
+        <div class="flex flex-col gap-2">
+          <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-200">
+            Name
+          </label>
+          <input
+            type="text"
+            :id="project.created"
+            class="border border-gray-300 rounded-md p-2 dark:text-gray-800"
+            v-model="changingProject.name"
+          />
+        </div>
+        <div class="flex justify-end">
+          <button type="submit" class="bg-blue-500 text-white font-semibold px-4 py-2 rounded-md">
+            Save
+          </button>
+        </div>
+      </form>
+    </template>
+  </Modal>
 </template>

@@ -1,13 +1,22 @@
 <script lang="ts" setup>
 import { useToggle, useDark } from '@vueuse/core'
+import { onMounted, ref } from 'vue'
 
 const isDark = useDark()
 const toggleDark = useToggle(isDark)
+
+const themeSwitcher = ref<HTMLInputElement>()
+
+onMounted(() => {
+  if (isDark.value) {
+    if (themeSwitcher.value) themeSwitcher.value.checked = true
+  }
+})
 </script>
 
 <template>
   <label id="switch" class="switch">
-    <input type="checkbox" @change="toggleDark()" id="slider" />
+    <input ref="themeSwitcher" type="checkbox" @change="toggleDark()" id="slider" />
     <span class="slider round"></span>
   </label>
 </template>

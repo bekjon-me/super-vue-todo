@@ -13,6 +13,16 @@ export const useProjects = defineStore('projects', () => {
     projects.value = projectsList
   }
 
+  const updateProject = (project: Project) => {
+    const index = projects.value.findIndex((p) => p.upid === project.upid)
+    projects.value[index] = project
+  }
+
+  const deleteProject = (id: number) => {
+    const index = projects.value.findIndex((p) => p.upid === id)
+    projects.value.splice(index, 1)
+  }
+
   const deleteProjects = () => {
     projects.value = []
   }
@@ -21,6 +31,8 @@ export const useProjects = defineStore('projects', () => {
     projects,
     createProject,
     setProjects,
-    deleteProjects
+    deleteProjects,
+    updateProject,
+    deleteProject
   }
 })

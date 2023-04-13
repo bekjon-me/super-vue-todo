@@ -1,5 +1,14 @@
+<script lang="ts" setup>
+import { useDark } from '@vueuse/core'
+import { computed } from 'vue'
+
+const isDark = useDark()
+
+const bg = computed(() => (isDark.value ? 'bg-black' : 'bg-white'))
+</script>
+
 <template>
-  <main>
+  <main :class="bg">
     <div class="loader">
       <span></span>
       <span></span>
@@ -14,6 +23,10 @@ main {
   align-items: center;
   justify-content: center;
   height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
 }
 
 .loader span {

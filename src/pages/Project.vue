@@ -14,7 +14,7 @@ import { storeToRefs } from 'pinia'
 import { Status, type Todo } from '@/models/todo'
 import { Importance } from '@/models/todo'
 import { addTask } from '@/service/addTask'
-import Datepicker from 'vue3-datepicker'
+import VueDatePicker from '@vuepic/vue-datepicker'
 
 const fetchData = async () => {
   try {
@@ -54,18 +54,15 @@ const newTodo = ref({
 const file = ref<string | Blob>('')
 
 const handleAddTask = () => {
-  console.log(toRaw(newTodo.value))
-
   toggleModal()
   addTask(toRaw(newTodo.value), id as string, file)
 }
 
 const handleFileUpload = (e: any) => {
   file.value = e.target.files[0]
-  console.log(file.value)
 }
 
-const format = 'yyyy-MM-dd HH:mm:ss'
+const customPosition = () => ({ top: '100%', left: 0 })
 </script>
 
 <template>
@@ -111,12 +108,12 @@ const format = 'yyyy-MM-dd HH:mm:ss'
             >
               Start date
             </label>
-            <Datepicker
+            <VueDatePicker
               id="startDate"
               type="date"
-              class="border-[1px] border-[#333] rounded py-[12px] px-[24px] mt-[12px] mb-[12px] text-[#333] w-full"
+              class="border-[1px] border-[#333] rounded mt-[12px] mb-[12px] text-[#333] w-full"
               v-model="newTodo.beginning"
-              :format="format"
+              :alt-position="customPosition"
             />
           </div>
           <div>
@@ -126,12 +123,12 @@ const format = 'yyyy-MM-dd HH:mm:ss'
             >
               End date
             </label>
-            <Datepicker
+            <VueDatePicker
               id="endDate"
               type="date"
-              class="border-[1px] border-[#333] rounded py-[12px] px-[24px] mt-[12px] mb-[12px] text-[#333] w-full"
+              class="border-[1px] border-[#333] rounded py-[12px] px-[24px] mt-[12px] mb-[12px] text-[#333] w-[100%]"
               v-model="newTodo.completion"
-              :format="format"
+              :alt-position="customPosition"
             />
           </div>
         </div>
@@ -179,6 +176,8 @@ const format = 'yyyy-MM-dd HH:mm:ss'
           aria-describedby="file_input_help"
           id="file_input"
           type="file"
+          accept=".doc,.docx,.pdf,image/*,audio/*"
+          max-size="5000000"
           @change="handleFileUpload"
         />
 

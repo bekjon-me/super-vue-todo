@@ -8,6 +8,11 @@ module.exports = {
         poppins: ['Poppins', 'sans-serif'],
         dancing: ['Dancing Script', 'cursive']
       }
+    },
+    screens: {
+      xs: '480px',
+      sm: '640px',
+      md: '960px'
     }
   },
   plugins: [require('flowbite/plugin')]

@@ -12,7 +12,7 @@ import { ChevronLeftIcon } from '@heroicons/vue/20/solid'
 const { user } = storeToRefs(useAuth())
 const modal = useModal()
 const { showModal } = storeToRefs(modal)
-const utils = {
+const labels = {
   first_name: 'First name',
   last_name: 'Last name',
   username: 'Username',
@@ -32,15 +32,15 @@ const handleSubmit = () => {
   </RouterLink>
   <div class="flex flex-col justify-center items-center h-[90vh] w-[100%]">
     <img class="rounded-full w-36" :src="userImg" alt="User image" />
-    <div class="w-[70%] mt-4 flex flex-col gap-2">
+    <div class="sm:w-[70%] xs:w-max mt-4 flex flex-col gap-2">
       <div v-for="(value, key) in user" :key="key">
         <div
           v-if="key != 'pk'"
           class="flex flex-wrap items-center justify-between p-2 rounded-md border border-white"
         >
-          <span class="font-poppins mr-1">{{ utils[key] + ' :' }}</span>
+          <span class="sm:text-xl xs:text-xs font-poppins mr-1">{{ labels[key] + ' :' }}</span>
           <div class="flex items-center gap-2">
-            <h1 class="text-xl font-bold font-poppins break-all">
+            <h1 class="sm:text-xl xs:text-xs font-bold font-poppins break-all">
               {{ value ? value : 'Not entered' }}
             </h1>
           </div>
@@ -59,13 +59,13 @@ const handleSubmit = () => {
   <Modal v-if="showModal">
     <template #form>
       <form class="flex flex-col gap-4" @submit.prevent="handleSubmit">
-        <div v-for="(value, key) in utils">
+        <div v-for="(value, key) in labels">
           <div v-if="key != 'email'" class="flex flex-col gap-2">
-            <label for="first_name">{{ value }}</label>
+            <label :for="key">{{ value }}</label>
             <input
               type="text"
-              id="first_name"
-              class="border border-gray-300 rounded-md p-2"
+              :id="key"
+              class="border border-gray-300 rounded-md p-2 dark:text-gray-800"
               v-model="(modalUser as User)[key]"
             />
           </div>

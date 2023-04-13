@@ -6,6 +6,7 @@ import Login from '../pages/Login.vue'
 import Register from '../pages/Register.vue'
 import Profile from '../pages/Profile.vue'
 import Project from '../pages/Project.vue'
+import Todo from '../pages/Todo.vue'
 import axios from 'axios'
 
 const source = axios.CancelToken.source()
@@ -32,14 +33,14 @@ const routes: RouteRecordRaw[] = [
     component: Profile
   },
   {
-    path: '/projects/:id/tasks',
+    path: '/projects/:id/todos',
     name: 'Project',
     component: Project
   },
   {
     path: '/projects/:id/todos/:todoId',
     name: 'Todo',
-    component: Profile
+    component: Todo
   },
   {
     path: '/:catchAll(.*)*',
@@ -73,7 +74,7 @@ router.beforeEach(async (to, from, next) => {
       next()
     }
   } else {
-    if (to.name === 'Home' || to.name === 'Project') {
+    if (to.name === 'Home' || to.name === 'Project' || to.name === "Todo" || to.name === "Profile") {
       next('/login')
     } else {
       next()

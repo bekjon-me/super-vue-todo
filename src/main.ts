@@ -6,6 +6,7 @@ import './index.css'
 import 'vue3-audio-player/dist/style.css'
 import App from './App.vue'
 import router from './router'
+import '@vuepic/vue-datepicker/dist/main.css'
 
 const app = createApp(App)
 app.use(createPinia())

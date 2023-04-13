@@ -1,5 +1,5 @@
 import type { Todo } from './../models/todo'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 
 export const useTodos = defineStore('todos', () => {

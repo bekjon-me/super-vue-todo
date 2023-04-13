@@ -8,13 +8,13 @@ import { useModal } from '@/stores/modal'
 import { storeToRefs } from 'pinia'
 import { addProject } from '@/service/addProject'
 import { useTodos } from '@/stores/todos'
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 
 const modal = useModal()
 const project = useProjects()
 const { projects } = storeToRefs(project)
-const { toggleModal, setProjectName } = modal
-const { showModal, projectName } = storeToRefs(modal)
+const { toggleModal, setProjectName, toggleMainModal } = modal
+const { showModal, projectName, showMainModal } = storeToRefs(modal)
 const { setTodos } = useTodos()
 
 onMounted(async () => {
@@ -23,18 +23,24 @@ onMounted(async () => {
 
 const handleAddProject = () => {
   toggleModal()
+  toggleMainModal()
   addProject(projectName.value)
-  setProjectName('sas')
+  setProjectName('')
+}
+
+const openModal = () => {
+  toggleModal()
+  toggleMainModal()
 }
 </script>
 
 <template>
   <Header />
-  <Button class="bg-[green] py-[12px] px-[24px] rounded w-[100%] text-white" @click="toggleModal">
+  <Button class="bg-[green] py-[12px] px-[24px] rounded w-[100%] text-white" @click="openModal">
     Add project
   </Button>
   <h1 class="mt-2 text-[30px] border-b-2">Projects</h1>
-  <Modal v-if="showModal">
+  <Modal v-if="showModal && showMainModal">
     <template #form>
       <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Add a new project</h3>
       <form class="space-y-3" @submit.prevent="handleAddProject">

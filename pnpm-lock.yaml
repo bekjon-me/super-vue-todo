@@ -8,6 +8,7 @@ specifiers:
   '@vue/eslint-config-prettier': ^7.1.0
   '@vue/eslint-config-typescript': ^11.0.2
   '@vue/tsconfig': ^0.1.3
+  '@vuepic/vue-datepicker': ^4.3.0
   '@vueuse/core': ^9.13.0
   autoprefixer: ^10.4.14
   axios: ^1.3.4
@@ -16,6 +17,7 @@ specifiers:
   flowbite: ^1.6.4
   fs: 0.0.1-security
   jwt-decode: ^3.1.2
+  moment: ^2.29.4
   npm-run-all: ^4.1.5
   pinia: ^2.0.32
   postcss: ^8.4.21
@@ -28,22 +30,22 @@ specifiers:
   vue-router: ^4.1.6
   vue-tsc: ^1.2.0
   vue3-audio-player: ^1.0.7
-  vue3-datepicker: ^0.3.4
   vue3-toastify: ^0.1.5
 
 dependencies:
   '@heroicons/vue': 2.0.17_vue@3.2.47
+  '@vuepic/vue-datepicker': 4.3.0_vue@3.2.47
   '@vueuse/core': 9.13.0_vue@3.2.47
   axios: 1.3.4
   flowbite: 1.6.4
   fs: 0.0.1-security
   jwt-decode: 3.1.2
+  moment: 2.29.4
   pinia: 2.0.33_7h6e7cvei2rsgyre2mq4fyhehq
   solid: link:@heroicons/vue/20/solid
   vue: 3.2.47
   vue-router: 4.1.6_vue@3.2.47
   vue3-audio-player: 1.0.7
-  vue3-datepicker: 0.3.4_vue@3.2.47
   vue3-toastify: 0.1.6_vue@3.2.47
 
 devDependencies:
@@ -730,6 +732,17 @@ packages:
       '@types/node': 18.15.11
     dev: true
 
+  /@vuepic/vue-datepicker/4.3.0_vue@3.2.47:
+    resolution: {integrity: sha512-zERFSBNz0h5W/mNKsXSG5QggKw8eh0v24rs2T4JSPirRSPLFq67msgjDgHsbRshcPmer7ZBVlBGev9on5KYVnw==}
+    engines: {node: '>=14'}
+    peerDependencies:
+      vue: '>=3.2.0'
+    dependencies:
+      date-fns: 2.29.3
+      date-fns-tz: 1.3.8_date-fns@2.29.3
+      vue: 3.2.47
+    dev: false
+
   /@vueuse/core/9.13.0_vue@3.2.47:
     resolution: {integrity: sha512-pujnclbeHWxxPRqXWmdkKV5OX4Wk4YeK7wusHqRwU0Q7EFusHoqNA/aPhB6KCh9hEqJkLAJo7bb0Lh9b+OIVzw==}
     dependencies:
@@ -1032,6 +1045,14 @@ packages:
 
   /csstype/2.6.21:
     resolution: {integrity: sha512-Z1PhmomIfypOpoMjRQB70jfvy/wxT50qW08YXO5lMIJkrdq4yOTR+AW7FqutScmB9NkLwxo+jU+kZLbofZZq/w==}
+
+  /date-fns-tz/1.3.8_date-fns@2.29.3:
+    resolution: {integrity: sha512-qwNXUFtMHTTU6CFSFjoJ80W8Fzzp24LntbjFFBgL/faqds4e5mo9mftoRLgr3Vi1trISsg4awSpYVsOQCRnapQ==}
+    peerDependencies:
+      date-fns: '>=2.0.0'
+    dependencies:
+      date-fns: 2.29.3
+    dev: false
 
   /date-fns/2.29.3:
     resolution: {integrity: sha512-dDCnyH2WnnKusqvZZ6+jA1O51Ibt8ZMRNkDZdyAyK4YfbDwa/cEmuztzG5pk6hqlp9aSBPYcjOlktquahGwGeA==}
@@ -1949,6 +1970,10 @@ packages:
       brace-expansion: 2.0.1
     dev: true
 
+  /moment/2.29.4:
+    resolution: {integrity: sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==}
+    dev: false
+
   /ms/2.1.2:
     resolution: {integrity: sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==}
     dev: true
@@ -2796,16 +2821,6 @@ packages:
     dependencies:
       '@any-touch/core': 2.2.0
       '@any-touch/pan': 2.2.0
-      vue: 3.2.47
-    dev: false
-
-  /vue3-datepicker/0.3.4_vue@3.2.47:
-    resolution: {integrity: sha512-pD4Lixnqdr6KeIO/ZK/xdmhYDQUvMPHgTeWkNYeAx5sKY4eaNItOqbLuevwI51d3ubozhNS1y+Z8Enxi33pXiQ==}
-    engines: {node: '>=10.16.0'}
-    peerDependencies:
-      vue: ^3.0.0
-    dependencies:
-      date-fns: 2.29.3
       vue: 3.2.47
     dev: false
 
