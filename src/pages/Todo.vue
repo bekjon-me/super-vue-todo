@@ -167,7 +167,10 @@ const customPosition = () => ({ top: '100%', left: 0 })
               <h2 v-if="key === 'beginning' || key === 'completion'">
                 {{ moment(actualTodo?.[key]).format('DD-MM-YYYY HH:mm:ss') }}
               </h2>
-              <div v-else-if="key === 'importance'" :class="importanceColors[actualTodo?.[key]]">
+              <div
+                v-else-if="key === 'importance'"
+                :class="importanceColors[actualTodo?.importance as 'not_important' | 'moderately_important' | 'important']"
+              >
                 {{ actualTodo?.[key].split('_').join(' ').toUpperCase() }}
               </div>
               <h2 v-else>{{ actualTodo?.[key].split('_').join(' ').toUpperCase() }}</h2>
