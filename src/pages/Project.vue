@@ -55,7 +55,7 @@ const file = ref<string | Blob>('')
 
 const handleAddTask = () => {
   toggleModal()
-  addTask(toRaw(newTodo.value), id as string, file)
+  addTask(newTodo, id as string, file)
 }
 
 const handleFileUpload = (e: any) => {
@@ -101,6 +101,9 @@ const customPosition = () => ({ top: '100%', left: 0 })
           v-model.trim="newTodo.description"
         />
         <div class="flex flex-col gap-x-4 justify-around mt-2">
+          <h2 class="block mb-2 text-sm font-medium text-red-700">
+            Start date must be before the end date
+          </h2>
           <div>
             <label
               class="block mt-4 text-sm font-medium text-gray-900 dark:text-white"
@@ -111,7 +114,7 @@ const customPosition = () => ({ top: '100%', left: 0 })
             <VueDatePicker
               id="startDate"
               type="date"
-              class="border-[1px] border-[#333] rounded mt-[12px] mb-[12px] text-[#333] w-full"
+              class="border-none rounded mt-[12px] mb-[12px] text-[#333] w-full"
               v-model="newTodo.beginning"
               :alt-position="customPosition"
             />
@@ -126,7 +129,7 @@ const customPosition = () => ({ top: '100%', left: 0 })
             <VueDatePicker
               id="endDate"
               type="date"
-              class="border-[1px] border-[#333] rounded py-[12px] px-[24px] mt-[12px] mb-[12px] text-[#333] w-[100%]"
+              class="border-none rounded mt-[12px] mb-[12px] text-[#333] w-full"
               v-model="newTodo.completion"
               :alt-position="customPosition"
             />
@@ -193,6 +196,11 @@ const customPosition = () => ({ top: '100%', left: 0 })
 
   <div class="mt-2 text-[30px] text-[#333] border-b-2 dark:text-white">Tasks</div>
   <div class="flex flex-wrap gap-4 justify-around mt-2">
-    <TodoCard v-for="todo in todos" :todo="todo" />
+    <div v-if="todos.length > 0" v-for="todo in todos">
+      <TodoCard :todo="todo" />
+    </div>
+    <div v-else>
+      <h1 class="text-[#333] text-[20px] dark:text-gray-200">No todos yet</h1>
+    </div>
   </div>
 </template>

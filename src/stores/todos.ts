@@ -13,9 +13,14 @@ export const useTodos = defineStore('todos', () => {
     todos.value.push(todo)
   }
 
+  const deleteTodo = (id: number) => {
+    todos.value = todos.value.filter((todo) => (todo.ptid as number) !== id)
+  }
+
   return {
     todos,
     setTodos,
-    createTodo
+    createTodo,
+    deleteTodo
   }
 })

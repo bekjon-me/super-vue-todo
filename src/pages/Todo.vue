@@ -1,18 +1,22 @@
 <script lang="ts" setup>
 import Header from '@/components/Header.vue'
 import Modal from '@/components/Modal.vue'
+import Confirmation from '@/components/Confirmation.vue'
 import { withTokenInstance } from '@/api/axios'
 import { Importance, Status, type Todo } from '@/models/todo'
 import { PROJECTS_URL } from '@/utils/urls'
-import { onMounted, ref, toRaw, watchEffect } from 'vue'
+import { onMounted, ref, toRaw } from 'vue'
 import { useRoute } from 'vue-router'
 import { useFilesDownloaded } from '@/stores/filesDownloaded'
 import { useModal } from '@/stores/modal'
+import { useLoader } from '@/stores/loader'
 import { storeToRefs } from 'pinia'
 import axios from 'axios'
 import moment from 'moment'
 import VueDatePicker from '@vuepic/vue-datepicker'
 import { updateTodo } from '@/service/updateTodo'
+import { deleteTodo } from '@/service/deleteTodo'
+import router from '@/router'
 
 type File = {
   value: string
@@ -25,11 +29,12 @@ const { id, todoId } = params
 const { setFilesDownloaded } = useFilesDownloaded()
 const { filesDownloadedForFirstTime } = storeToRefs(useFilesDownloaded())
 const files = ref<File[]>([])
-const loading = ref(false)
-const actualTodo = ref<Todo>()
+const { setLoader } = useLoader()
 const modal = useModal()
 const { showModal } = storeToRefs(modal)
+const actualTodo = ref<Todo>()
 const { toggleModal } = modal
+const confirmationModal = ref(false)
 
 function checkBlobType(blobUrl: string) {
   console.log(blobUrl)
@@ -77,120 +82,20 @@ const forceFileDownload = async (response: any) => {
   return url
 }
 
-// Main async function
-
-// try {
-//     loading.value = true
-//     if ((props.todo.attached_files as any[]).length > 0) {
-//       if (localStorage.getItem(`${id}${props.todo.ptid}`) && filesDownloadedForFirstTime.value) {
-//         file.value = localStorage.getItem(`${id}${props.todo.ptid}`) as string
-//         await checkBlobType(file.value)
-//       } else {
-//         const res = await withTokenInstance.get(
-//           `${PROJECTS_URL}${id}/tasks/${props.todo.ptid}/files/${
-//             (props.todo.attached_files as any[])[(props.todo.attached_files as any[]).length - 1]
-//               .tfid
-//           }`
-//         )
-
-//         const attachedFile = res.data.attached_file
-
-//         const newAxiosInstance = axios.create()
-//         newAxiosInstance.interceptors.request = withTokenInstance.interceptors.request
-//         newAxiosInstance.interceptors.response = withTokenInstance.interceptors.response
-
-//         // lets get content length of the file
-//         async function getFileMetadata() {
-//           const response = await newAxiosInstance(attachedFile, {
-//             method: 'HEAD',
-//             headers: {
-//               'Content-Type': 'application/json'
-//             }
-//           })
-
-//           // Retrieve metadata from response headers
-//           const fileSize = response.headers.get('Content-Length')
-//           const contentType = response.headers.get('Content-Type')
-
-//           console.log(fileSize, contentType)
-
-//           // Do something with the metadata, e.g. display it in UI
-//         }
-
-//         getFileMetadata()
-
-//         const res2 = await newAxiosInstance.get(attachedFile, {
-//           cancelToken: source.token,
-//           responseType: 'blob'
-//         })
-
-//         localStorage.setItem(`${id}${props.todo.ptid}`, await forceFileDownload(res2.data))
-//         forceFileDownload(res2.data)
-//         setFilesDownloaded(true)
-//       }
-//     } else {
-//       file.value = doThis
-//       console.log('no file')
-//     }
-//   } catch (error) {
-//     attachedIs.value = 'image'
-//     file.value = doThis
-//   } finally {
-//     loading.value = false
-//   }
-
 onMounted(async () => {
-  await withTokenInstance
-    .get(PROJECTS_URL + id + '/tasks/' + todoId + '/')
-    .then((response) => {
-      actualTodo.value = response.data
-      console.log(actualTodo.value)
-    })
-    .catch((error) => {
-      console.log(error)
-    })
-
   try {
-    loading.value = true
-    if ((actualTodo.value?.attached_files as any[]).length > 0) {
-      actualTodo.value?.attached_files?.forEach(async (file) => {
-        await withTokenInstance
-          .get(`${PROJECTS_URL}${id}/tasks/${todoId}/files/${file.tfid}/`)
-          .then(async (response) => {
-            const attachedFile = response.data.attached_file
-
-            const newAxiosInstance = axios.create()
-            newAxiosInstance.interceptors.request = withTokenInstance.interceptors.request
-            newAxiosInstance.interceptors.response = withTokenInstance.interceptors.response
-
-            const res2 = await newAxiosInstance.get(attachedFile, {
-              cancelToken: source.token,
-              responseType: 'blob'
-            })
-            console.log(res2.data)
-
-            // localStorage.setItem(`${id}${todoId}`, await forceFileDownload(res2.data))
-            forceFileDownload(res2.data)
-            setFilesDownloaded(true)
-          })
-          .catch((error) => {
-            console.log(error)
-          })
-      })
-    } else {
-      // file.value = doThis
-      // console.log('no file')
+    setLoader(true)
+    const response = await withTokenInstance.get(PROJECTS_URL + id + '/tasks/' + todoId + '/')
+    actualTodo.value = response.data
+    console.log(actualTodo.value)
+  } catch (error: any) {
+    if (error.response.status === 404) {
+      await router.push({ name: 'Project', params: { id } })
     }
-  } catch (error) {
-    // attachedIs.value = 'image'
-    // file.value = doThis
+    console.log(error)
   } finally {
-    loading.value = false
+    setLoader(false)
   }
-})
-
-watchEffect(() => {
-  console.log(files.value)
 })
 
 const shownKeys = {
@@ -211,14 +116,29 @@ const labels = {
   current_status: 'Status'
 }
 
-const editTodo = () => {
+const importanceColors = {
+  not_important: 'bg-green-500 p-2 rounded',
+  moderately_important: 'bg-yellow-500 p-2 rounded',
+  important: 'bg-red-500 p-2 rounded'
+}
+
+const handleEdit = () => {
   modalTodo.value = { ...actualTodo.value }
   toggleModal()
   console.log('edit')
 }
 
+const handleDelete = () => {
+  console.log('delete')
+  deleteTodo(id as string, todoId as string)
+}
+
 const handleSubmit = () => {
   updateTodo(toRaw(modalTodo.value), actualTodo, id, todoId)
+}
+
+const closeConfirmation = () => {
+  confirmationModal.value = false
 }
 
 const customPosition = () => ({ top: '100%', left: 0 })
@@ -227,7 +147,7 @@ const customPosition = () => ({ top: '100%', left: 0 })
 <template>
   <Header />
   <div class="bg-gray-100 p-8 rounded-md shadow-md dark:bg-gray-800 dark:text-gray-200 relative">
-    <h1 class="mb-3 text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+    <h1 class="mb-3 mt-4 text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
       {{ actualTodo?.title }}
     </h1>
     <p class="mb-3 text-gray-500 dark:text-gray-400">{{ actualTodo?.description }}</p>
@@ -244,18 +164,20 @@ const customPosition = () => ({ top: '100%', left: 0 })
             <div
               class="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white"
             >
-              {{
-                key === 'beginning' || key === 'completion'
-                  ? moment(actualTodo?.[key]).format('DD-MM-YYYY HH:mm:ss')
-                  : actualTodo?.[key].split('_').join(' ').toUpperCase()
-              }}
+              <h2 v-if="key === 'beginning' || key === 'completion'">
+                {{ moment(actualTodo?.[key]).format('DD-MM-YYYY HH:mm:ss') }}
+              </h2>
+              <div v-else-if="key === 'importance'" :class="importanceColors[actualTodo?.[key]]">
+                {{ actualTodo?.[key].split('_').join(' ').toUpperCase() }}
+              </div>
+              <h2 v-else>{{ actualTodo?.[key].split('_').join(' ').toUpperCase() }}</h2>
             </div>
           </div>
         </li>
       </ul>
     </div>
 
-    <div class="absolute bottom-2 right-6 flex flex-col items-center justify-center">
+    <div class="absolute top-2 right-2 flex flex-col items-center justify-center">
       <span class="text-xs text-gray-500 dark:text-gray-400">
         Created at
         {{ moment(actualTodo?.created).format('DD-MM-YYYY HH:mm:ss') }}
@@ -267,12 +189,18 @@ const customPosition = () => ({ top: '100%', left: 0 })
       </span>
     </div>
     <!-- // edit button is here -->
-    <div class="absolute bottom-2 left-6">
+    <div class="absolute bottom-2 left-6 flex gap-4">
       <button
         class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        @click="editTodo"
+        @click="handleEdit"
       >
         Edit
+      </button>
+      <button
+        class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+        @click="handleDelete"
+      >
+        Delete
       </button>
     </div>
 
@@ -335,7 +263,12 @@ const customPosition = () => ({ top: '100%', left: 0 })
         </form>
       </template>
     </Modal>
+    <!-- <Confirmation v-if="confirmationModal" @closeFn="closeConfirmation" @doFn="handleDelete" /> -->
   </div>
+
+  <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-4 mt-8 md:mt-12 md:mb-6">
+    Attached files
+  </h2>
 
   <!-- <div
     v-if="files.length > 0"

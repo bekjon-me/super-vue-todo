@@ -23,6 +23,9 @@ export const handleLogin = async (values: any) => {
     createUser(res.data.user)
     router.push('/')
     toast.success('You have successfully logged in')
+
+    const res2 = await withTokenInstance.get(PROJECTS_URL)
+    setProjects(res2.data)
   } catch (error: any) {
     console.log(error)
     if (error.response?.data.email) {
@@ -34,16 +37,6 @@ export const handleLogin = async (values: any) => {
     if (error.response?.data.non_field_errors) {
       toast.error(error.response.data.non_field_errors[0])
     }
-  } finally {
-    setLoader(false)
-  }
-
-  try {
-    setLoader(true)
-    const res = await withTokenInstance.get(PROJECTS_URL)
-    setProjects(res.data)
-  } catch (error: any) {
-    console.log(error)
   } finally {
     setLoader(false)
   }

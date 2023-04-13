@@ -8,7 +8,7 @@ import { useModal } from '@/stores/modal'
 import { storeToRefs } from 'pinia'
 import { addProject } from '@/service/addProject'
 import { useTodos } from '@/stores/todos'
-import { onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
 
 const modal = useModal()
 const project = useProjects()
@@ -73,7 +73,7 @@ const openModal = () => {
       <ProjectCard :project="project" />
     </div>
     <div v-else>
-      <h1 class="text-[#333] text-[20px]">No projects yet</h1>
+      <h1 class="text-[#333] text-[20px] dark:text-gray-200">No projects yet</h1>
     </div>
   </div>
 </template>

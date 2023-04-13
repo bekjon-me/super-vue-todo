@@ -73,20 +73,6 @@ onUnmounted(() => {
                 Profile
               </RouterLink>
             </li>
-            <li>
-              <a
-                href="#"
-                class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                >Settings</a
-              >
-            </li>
-            <li>
-              <a
-                href="#"
-                class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                >Earnings</a
-              >
-            </li>
             <li
               @click="handleLogout"
               class="bg-red-600 hover:bg-red-500 flex items-center text-white cursor-pointer"
